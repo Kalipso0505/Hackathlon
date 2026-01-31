@@ -1,7 +1,7 @@
 # Hackathlon – Makefile für Installation, Start und Wartung
 # Voraussetzung: Docker und Docker Compose installiert
 
-.PHONY: default install start stop openapi update help seed-prompts migrate fresh
+.PHONY: default install start stop down openapi update help seed-prompts migrate fresh db-reset
 
 # Standardziel: Hilfe anzeigen, wenn make ohne Ziel aufgerufen wird
 default: help
@@ -12,7 +12,7 @@ default: help
 install:
 	docker compose up -d --build
 	docker compose exec php composer setup
-	docker compose exec php php artisan db:seed --class=PromptTemplateSeeder
+	docker compose exec php php artisan db:seed
 
 # ------------------------------------------------------------------------------
 # Start / Stop
@@ -39,7 +39,18 @@ migrate:
 	docker compose exec php php artisan migrate
 
 fresh:
-	docker compose exec php php artisan migrate:fresh --seed
+	docker compose exec php php artisan db:wipe --drop-views --force
+	docker compose exec php php artisan migrate --seed
+
+db-reset:
+	@echo "Kompletter Datenbank-Reset (löscht alle MySQL-Daten)..."
+	docker compose stop db
+	docker run --rm -v $$(pwd)/.docker/db/data:/data alpine sh -c "rm -rf /data/*"
+	docker compose up -d db
+	@echo "Warte auf MySQL-Initialisierung..."
+	@sleep 15
+	docker compose exec db mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS refactorian CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+	docker compose exec php php artisan migrate --seed
 
 seed-prompts:
 	docker compose exec php php artisan db:seed --class=PromptTemplateSeeder
@@ -52,7 +63,7 @@ update:
 	docker compose up -d
 	docker compose exec php composer update
 	docker compose exec php php artisan migrate
-	docker compose exec php php artisan db:seed --class=PromptTemplateSeeder
+	docker compose exec php php artisan db:seed
 	docker compose exec php npm install
 	docker compose exec php npm run build
 
@@ -68,7 +79,8 @@ help:
 	@echo "  make down         – Container stoppen und entfernen"
 	@echo "  make openapi      – OpenAPI-Spezifikation aus Code generieren"
 	@echo "  make migrate      – Datenbank-Migrationen ausführen"
-	@echo "  make fresh        – Datenbank neu aufsetzen (migrate:fresh --seed)"
+	@echo "  make fresh        – Datenbank-Tabellen löschen und neu migrieren (db:wipe + migrate)"
+	@echo "  make db-reset     – Kompletter Datenbank-Reset (bei korrupten MySQL-Daten)"
 	@echo "  make seed-prompts – Prompt-Templates in Datenbank laden/aktualisieren"
 	@echo "  make update       – Projekt aktualisieren (docker build, migrate, seed, npm)"
 	@echo "  make help         – Diese Hilfe anzeigen"

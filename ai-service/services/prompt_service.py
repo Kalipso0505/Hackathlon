@@ -12,6 +12,7 @@ from typing import Optional
 from functools import lru_cache
 
 import httpx
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -87,21 +88,24 @@ class PromptService:
         """
         Get a scenario as a parsed dictionary.
         
+        Supports both YAML and JSON formats for backwards compatibility.
+        
         Args:
             key: The scenario key (default: 'default_scenario')
             
         Returns:
             Parsed scenario dictionary or None
         """
-        scenario_json = self.get_prompt(key)
+        scenario_content = self.get_prompt(key)
         
-        if not scenario_json:
+        if not scenario_content:
             return None
         
+        # Try YAML first (also handles JSON as YAML is a superset)
         try:
-            return json.loads(scenario_json)
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse scenario JSON: {e}")
+            return yaml.safe_load(scenario_content)
+        except yaml.YAMLError as e:
+            logger.error(f"Failed to parse scenario YAML: {e}")
             return None
     
     def reload(self) -> None:
