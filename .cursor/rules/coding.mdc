@@ -22,15 +22,16 @@ alwaysApply: true
   2. Controller per Artisan erzeugen
   3. Logik implementieren
   4. **Ausführlich testen**
-  5. OpenAPI-Doku ergänzen (`/public/openapi.yaml` / oder abweichernder openapi Ort im Projekt)
+  5. OpenAPI aus Code neu generieren: `docker compose exec php php artisan scramble:export --path=public/openapi.json` (oder `composer openapi`)
 
 > Allgemeine Controller-/Service-/DTO-Regeln sind in **laravel-boost.mdc** definiert.
 
 ## 📄 OpenAPI / Dokumentation (Projektstandard)
 
-- Jede neue oder geänderte API **muss** in `/public/openapi.yaml` (oder abweichernder openapi Ort im Projekt) gepflegt werden
-- Keine losgelöste Doku außerhalb der OpenAPI
-- Beispiele realistisch, keine Platzhalter wie `foo` oder `bar`
+- OpenAPI-Spezifikation wird **aus dem Code** mit [Scramble](https://scramble.dedoc.co/) generiert (Routen, Controller, Validierung).
+- Nach neuen oder geänderten API-Endpoints: `docker compose exec php php artisan scramble:export --path=public/openapi.json` ausführen (oder `composer openapi`). Ergebnis: `public/openapi.json`.
+- Doku-UI: `/docs/api` (nur in lokaler Umgebung, sofern nicht per Gate freigegeben).
+- Keine manuelle OpenAPI-Pflege; Beispiele und Schemas kommen aus dem Code.
 
 ## 🧪 Tests (Ergänzung)
 

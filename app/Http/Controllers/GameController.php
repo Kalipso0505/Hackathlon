@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\ChatMessage;
 use App\Models\Game;
 use App\Services\AiService;
+use Dedoc\Scramble\Attributes\ExcludeRouteFromDocs;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,6 +22,7 @@ class GameController extends Controller
     /**
      * Show the game page
      */
+    #[ExcludeRouteFromDocs]
     public function index(): Response
     {
         return Inertia::render('Game', [
