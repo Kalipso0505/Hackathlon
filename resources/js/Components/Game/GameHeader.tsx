@@ -1,5 +1,4 @@
 import { Button } from '@/Components/ui/button';
-import { AlertTriangle, List, Home, Bug } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 
@@ -12,82 +11,113 @@ export function GameHeader({ revealedClues, onAccuse }: GameHeaderProps) {
     const [showClues, setShowClues] = useState(false);
     
     return (
-        <header className="bg-slate-900/80 border-b border-slate-700/50 backdrop-blur-sm sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <header className="cia-bg-dark border-b border-white/10 sticky top-0 z-50 shadow-lg shadow-black/20">
+            {/* Top Status Bar */}
+            <div className="bg-black/70 border-b border-white/10 px-4 py-1 flex items-center justify-between text-xs cia-text">
                 <div className="flex items-center gap-4">
-                    <Link href="/" className="text-slate-400 hover:text-slate-200 transition-colors">
-                        <Home className="h-5 w-5" />
+                    <span className="text-white">CLASSIFIED</span>
+                    <span className="text-gray-400">CASE FILE:</span>
+                    <span className="cia-text-yellow">INNOTECH-2024</span>
+                </div>
+                <div className="flex items-center gap-4">
+                    <span className="text-gray-400">STATUS:</span>
+                    <span className="text-white cia-pulse">ACTIVE INVESTIGATION</span>
+                </div>
+                <div className="flex items-center gap-4">
+                    <span className="text-gray-400">SECURITY:</span>
+                    <span className="text-white">SEC 113</span>
+                </div>
+            </div>
+            
+            {/* Main Header */}
+            <div className="px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <Link href="/" className="text-white hover:text-gray-300 transition-colors text-xs cia-text uppercase">
+                        HOME
                     </Link>
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl">🔍</span>
-                        <div>
-                            <h1 className="font-bold text-red-100">Der Fall InnoTech</h1>
-                            <p className="text-xs text-slate-400">Ermittlung läuft...</p>
-                        </div>
+                    <div>
+                        <h1 className="font-bold text-white uppercase tracking-wider cia-text text-sm">
+                            ACTIVE INVESTIGATION
+                        </h1>
+                        <p className="text-xs text-gray-400 cia-text">CASE: <span className="cia-monospace">INNOTECH-2024-001</span></p>
                     </div>
                 </div>
                 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     {/* Debug button */}
                     <Link href="/debug">
-                        <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="border-slate-600 text-slate-300 hover:bg-slate-700/50 gap-2"
-                        >
-                            <Bug className="h-4 w-4" />
-                            <span className="hidden sm:inline">Debug</span>
-                        </Button>
+                        <button className="px-3 py-1.5 border border-white/10 text-gray-300 hover:bg-white/5 hover:border-white/20 transition-colors text-xs cia-text uppercase">
+                            DEBUG
+                        </button>
                     </Link>
                     
                     {/* Clues button */}
                     <div className="relative">
-                        <Button 
-                            variant="outline" 
-                            size="sm"
+                        <button 
                             onClick={() => setShowClues(!showClues)}
-                            className="border-slate-600 text-slate-300 hover:bg-slate-700/50 gap-2"
+                            className="px-3 py-1.5 border border-white/10 text-gray-300 hover:bg-white/5 hover:border-white/20 transition-colors text-xs cia-text uppercase flex items-center gap-2"
                         >
-                            <List className="h-4 w-4" />
-                            <span className="hidden sm:inline">Hinweise</span>
+                            <span>EVIDENCE</span>
                             {revealedClues.length > 0 && (
-                                <span className="bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                                <span className="bg-gray-800 text-white text-xs px-1.5 py-0.5 cia-text font-bold">
                                     {revealedClues.length}
                                 </span>
                             )}
-                        </Button>
+                        </button>
                         
                         {/* Clues dropdown */}
                         {showClues && (
-                            <div className="absolute right-0 mt-2 w-72 bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-3 z-50">
-                                <h3 className="font-semibold text-slate-200 mb-2 text-sm">Entdeckte Hinweise</h3>
-                                {revealedClues.length > 0 ? (
-                                    <ul className="space-y-1.5">
-                                        {revealedClues.map((clue, i) => (
-                                            <li key={i} className="text-xs text-slate-300 flex items-start gap-2">
-                                                <span className="text-red-400">•</span>
-                                                {clue}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="text-xs text-slate-400">
-                                        Noch keine Hinweise entdeckt. Befrage die Verdächtigen!
-                                    </p>
-                                )}
+                            <div className="absolute right-0 mt-2 w-80 cia-bg-panel border border-white/10 shadow-xl z-50">
+                                <div className="bg-black/50 border-b border-white/10 px-3 py-2">
+                                    <h3 className="font-semibold text-white text-xs uppercase cia-text">EVIDENCE LOG</h3>
+                                </div>
+                                <div className="p-3 max-h-64 overflow-y-auto cia-scrollbar">
+                                    {revealedClues.length > 0 ? (
+                                        <ul className="space-y-2">
+                                            {revealedClues.map((clue, i) => (
+                                                <li key={i} className="text-xs text-gray-300 cia-text flex items-start gap-2">
+                                                    <span className="text-white mt-0.5">▶</span>
+                                                    <span>{clue}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-xs text-gray-400 cia-text">
+                                            NO EVIDENCE COLLECTED. INTERROGATE SUBJECTS.
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
                     
                     {/* Accuse button */}
-                    <Button 
+                    <button 
                         onClick={onAccuse}
-                        className="bg-red-700 hover:bg-red-600 text-white gap-2"
-                        size="sm"
+                        className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white text-xs cia-text uppercase transition-colors font-bold"
                     >
-                        <AlertTriangle className="h-4 w-4" />
-                        <span className="hidden sm:inline">Beschuldigen</span>
-                    </Button>
+                        ACCUSE
+                    </button>
+                </div>
+            </div>
+            
+            {/* Bottom Status Bar */}
+            <div className="bg-black/50 border-t border-white/10 px-4 py-1 flex items-center justify-between text-xs cia-text">
+                <div className="flex items-center gap-4">
+                    <span className="text-gray-400">COMM SUBSYSTEM:</span>
+                    <span className="text-white">ONLINE</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(ch => (
+                        <div key={ch} className="flex items-center gap-1">
+                            <span className="text-gray-500">CH {String(ch).padStart(2, '0')}</span>
+                            <span className="w-1 h-3 bg-green-500"></span>
+                        </div>
+                    ))}
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="cia-text-yellow cia-pulse">●</span>
+                    <span className="text-gray-400">SYSTEM OPERATIONAL</span>
                 </div>
             </div>
         </header>

@@ -1,4 +1,3 @@
-import { Card, CardContent } from '@/Components/ui/card';
 
 interface Persona {
     slug: string;
@@ -6,6 +5,7 @@ interface Persona {
     role: string;
     description: string;
     emoji: string;
+    image?: string;
 }
 
 interface PersonaSelectorProps {
@@ -22,66 +22,89 @@ export function PersonaSelector({
     messageCount 
 }: PersonaSelectorProps) {
     return (
-        <Card className="bg-slate-800/50 border-slate-700/50 h-full">
-            <CardContent className="p-3 space-y-2">
-                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider px-2 py-1">
-                    Verdächtige
+        <div className="cia-bg-panel border border-white/10 h-full flex flex-col">
+            {/* Header */}
+            <div className="bg-black/50 border-b border-white/10 px-3 py-2">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider cia-text">
+                    CHATS (KONTAKTE)
                 </h3>
-                
-                <div className="space-y-2">
-                    {personas.map(persona => {
-                        const isSelected = selectedPersona?.slug === persona.slug;
-                        const count = messageCount[persona.slug] || 0;
-                        
-                        return (
-                            <button
-                                key={persona.slug}
-                                onClick={() => onSelect(persona)}
-                                className={`
-                                    w-full text-left p-3 rounded-lg transition-all duration-200
-                                    ${isSelected 
-                                        ? 'bg-red-900/50 border-red-500/50 border shadow-lg shadow-red-500/10' 
-                                        : 'bg-slate-700/30 border-slate-600/30 border hover:bg-slate-700/50 hover:border-slate-500/50'
-                                    }
-                                `}
-                            >
-                                <div className="flex items-start gap-3">
-                                    <div className="text-2xl">{persona.emoji}</div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between gap-2">
-                                            <span className={`font-medium truncate ${
-                                                isSelected ? 'text-red-100' : 'text-slate-200'
-                                            }`}>
-                                                {persona.name}
-                                            </span>
-                                            {count > 0 && (
-                                                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                                    isSelected 
-                                                        ? 'bg-red-700/50 text-red-200' 
-                                                        : 'bg-slate-600/50 text-slate-300'
-                                                }`}>
-                                                    {count}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className={`text-sm ${
-                                            isSelected ? 'text-red-300' : 'text-slate-400'
+            </div>
+            
+            {/* Chats List */}
+            <div className="flex-1 overflow-y-auto cia-scrollbar">
+                {personas.map(persona => {
+                    const isSelected = selectedPersona?.slug === persona.slug;
+                    const count = messageCount[persona.slug] || 0;
+                    
+                    return (
+                        <button
+                            key={persona.slug}
+                            onClick={() => onSelect(persona)}
+                            className={`
+                                w-full text-left p-3 transition-all duration-200 border-b border-white/5
+                                ${isSelected 
+                                    ? 'cia-bg-dark border-l-4 border-l-white/30' 
+                                    : 'cia-bg-panel hover:bg-black/30'
+                                }
+                            `}
+                        >
+                            <div className="flex items-center gap-3">
+                                {persona.image ? (
+                                    <div className="w-20 h-24 shrink-0 rounded overflow-hidden border-2 border-white/10">
+                                        <img 
+                                            src={persona.image} 
+                                            alt={persona.name}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                // Fallback zu Emoji bei Fehler
+                                                const target = e.target as HTMLImageElement;
+                                                target.style.display = 'none';
+                                                const parent = target.parentElement;
+                                                if (parent) {
+                                                    parent.innerHTML = `<div class="text-2xl flex items-center justify-center w-full h-full">${persona.emoji}</div>`;
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="text-2xl shrink-0">{persona.emoji}</div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-2 mb-1">
+                                        <span className={`font-semibold truncate cia-text text-sm ${
+                                            isSelected ? 'text-white' : 'text-gray-200'
                                         }`}>
-                                            {persona.role}
-                                        </div>
+                                            {persona.name}
+                                        </span>
+                                        {count > 0 && (
+                                            <span className={`text-xs px-1.5 py-0.5 cia-text font-bold shrink-0 ${
+                                                isSelected 
+                                                    ? 'bg-gray-800 text-white' 
+                                                    : 'bg-gray-800/30 text-white'
+                                            }`}>
+                                                {count}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className={`text-xs cia-text truncate ${
+                                        isSelected ? 'text-white opacity-80' : 'text-gray-400'
+                                    }`}>
+                                        {persona.role}
                                     </div>
                                 </div>
-                                
-                                {isSelected && (
-                                    <p className="mt-2 text-xs text-slate-300 line-clamp-2">
-                                        {persona.description}
-                                    </p>
-                                )}
-                            </button>
-                        );
-                    })}
+                            </div>
+                        </button>
+                    );
+                })}
+            </div>
+            
+            {/* Footer */}
+            <div className="bg-black/50 border-t border-white/10 px-3 py-2 text-xs cia-text text-gray-400">
+                <div className="flex items-center justify-between">
+                    <span>TOTAL:</span>
+                    <span className="text-white">{personas.length}</span>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

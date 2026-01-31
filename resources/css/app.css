@@ -74,7 +74,109 @@
     border-color: hsl(var(--border));
   }
   body {
-    background-color: hsl(var(--background));
+    background-color: #2b2b2b; /* Anthrazit */
     color: hsl(var(--foreground));
+    min-height: 100vh;
   }
+}
+
+/* CIA Interface Theme */
+
+.cia-grid-overlay {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.cia-grid-overlay-dense {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 10px 10px;
+}
+
+.cia-document {
+  background: #ffffff;
+  color: #000000;
+  font-family: 'Courier New', monospace;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.cia-monospace {
+  font-family: 'Courier New', 'Consolas', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* Lesbare Schriftart für Haupttexte */
+.cia-text {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  letter-spacing: -0.01em;
+  font-feature-settings: 'kern' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.cia-glow-cyan {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.cia-glow-cyan-strong {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+.cia-border-cyan {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cia-text-cyan {
+  color: #ffffff;
+}
+
+.cia-text-yellow {
+  color: #d4af37;
+}
+
+.cia-bg-dark {
+  background-color: #1a1a1a;
+}
+
+.cia-bg-darker {
+  background-color: #0f0f0f;
+}
+
+.cia-bg-panel {
+  background-color: #252525;
+}
+
+.cia-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.cia-scrollbar::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.cia-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.cia-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes cia-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.cia-pulse {
+  animation: cia-pulse 2s ease-in-out infinite;
 }

@@ -199,6 +199,7 @@ class GameController extends Controller
                 'role' => 'CEO',
                 'description' => 'Die Gründerin und CEO von InnoTech. Professionell, ehrgeizig, kontrolliert.',
                 'emoji' => '🏢',
+                'image' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=faces&q=80',
             ],
             [
                 'slug' => 'tom',
@@ -206,6 +207,7 @@ class GameController extends Controller
                 'role' => 'Lead Developer',
                 'description' => 'Der technische Kopf des Startups. Introvertiert, brillant, manchmal nervös.',
                 'emoji' => '💻',
+                'image' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=faces&q=80',
             ],
             [
                 'slug' => 'lisa',
@@ -213,6 +215,7 @@ class GameController extends Controller
                 'role' => 'Executive Assistant',
                 'description' => 'Die langjährige Assistentin. Loyal, aufmerksam, diskret.',
                 'emoji' => '📋',
+                'image' => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=faces&q=80',
             ],
             [
                 'slug' => 'klaus',
@@ -220,6 +223,7 @@ class GameController extends Controller
                 'role' => 'Facility Manager',
                 'description' => 'Der erfahrene Hausmeister. Ruhig, beobachtend, kennt alle Ecken.',
                 'emoji' => '🔧',
+                'image' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces&q=80',
             ],
         ];
     }
