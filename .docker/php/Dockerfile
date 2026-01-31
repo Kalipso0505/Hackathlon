@@ -1,5 +1,9 @@
 FROM php:8.4-fpm
 
+# Build arguments for user synchronization
+ARG WWWUSER=1000
+ARG WWWGROUP=1000
+
 COPY php.ini /usr/local/etc/php/
 COPY docker.conf /usr/local/etc/php-fpm.d/docker.conf
 COPY .bashrc /root/
@@ -10,7 +14,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # mix
 RUN apt-get update \
-  && apt-get install -y build-essential zlib1g-dev default-mysql-client curl gnupg procps vim git unzip libzip-dev libpq-dev \
+  && apt-get install -y build-essential zlib1g-dev default-mysql-client curl gnupg procps vim git unzip libzip-dev libpq-dev gosu \
   && docker-php-ext-install zip pdo_mysql pdo_pgsql pgsql
 
 # intl
@@ -58,8 +62,27 @@ RUN composer global require "laravel/installer"
 WORKDIR /root
 RUN git clone https://github.com/seebi/dircolors-solarized
 
+# Create application user with matching UID/GID from host
+RUN groupmod -o -g ${WWWGROUP} www-data \
+    && usermod -o -u ${WWWUSER} -g www-data www-data \
+    && mkdir -p /home/www-data \
+    && chown -R www-data:www-data /home/www-data
+
+# Set up composer for www-data user
+ENV COMPOSER_HOME /home/www-data/.composer
+RUN mkdir -p /home/www-data/.composer \
+    && chown -R www-data:www-data /home/www-data/.composer
+
+# Copy bashrc for www-data
+COPY .bashrc /home/www-data/.bashrc
+RUN chown www-data:www-data /home/www-data/.bashrc
+
 EXPOSE 5173
 WORKDIR /var/www
+
+# Set environment variables for user
+ENV WWWUSER=${WWWUSER}
+ENV WWWGROUP=${WWWGROUP}
 
 #entrypoint
 ENTRYPOINT ["entrypoint.sh"]

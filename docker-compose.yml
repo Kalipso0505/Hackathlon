@@ -4,11 +4,18 @@ services:
     # PHP
     ####################################################################################################
     php:
-        build: .docker/php
+        build:
+            context: .docker/php
+            args:
+                WWWUSER: ${WWWUSER:-1000}
+                WWWGROUP: ${WWWGROUP:-1000}
         ports:
             - 5173:5173
         volumes:
             - .:/var/www:cached
+        environment:
+            - WWWUSER=${WWWUSER:-1000}
+            - WWWGROUP=${WWWGROUP:-1000}
         depends_on:
             - ai-service
 
