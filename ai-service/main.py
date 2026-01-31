@@ -132,12 +132,22 @@ class GameStartRequest(BaseModel):
     game_id: str
 
 
+class VictimInfo(BaseModel):
+    """Victim information"""
+    name: str
+    role: str
+    description: str = ""
+
+
 class GameStartResponse(BaseModel):
     """Response for game start"""
     game_id: str
     scenario_name: str
     setting: str
-    victim: str
+    victim: VictimInfo
+    location: str = "Unknown Location"
+    time_of_incident: str = "Time unknown"
+    timeline: str = ""
     personas: list[dict]
     intro_message: str
 
