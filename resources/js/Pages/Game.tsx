@@ -8,6 +8,7 @@ import { GameHeader } from '@/Components/Game/GameHeader';
 import { AccuseModal } from '@/Components/Game/AccuseModal';
 import { CaseInfoPanel } from '@/Components/Game/CaseInfoPanel';
 import { StartScreen } from '@/Components/Game/StartScreen';
+import { IntroductionScreen } from '@/Components/Game/IntroductionScreen';
 import axios from 'axios';
 
 interface Persona {
@@ -30,10 +31,17 @@ interface Message {
 
 interface GameState {
     gameId: string | null;
-    status: 'not-started' | 'loading' | 'idle' | 'active' | 'solved' | 'failed';
+    status: 'not-started' | 'loading' | 'intro' | 'active' | 'solved' | 'failed';
     scenarioName: string;
     setting: string;
-    victim: string;
+    victim: {
+        name: string;
+        role: string;
+        description: string;
+    };
+    location: string;
+    timeOfIncident: string;
+    timeline: string;
     personas: Persona[];
     introMessage: string;
     revealedClues: string[];
@@ -50,7 +58,14 @@ export default function Game({}: Props) {
         status: 'not-started',
         scenarioName: '',
         setting: '',
-        victim: '',
+        victim: {
+            name: '',
+            role: '',
+            description: ''
+        },
+        location: '',
+        timeOfIncident: '',
+        timeline: '',
         personas: [],
         introMessage: '',
         revealedClues: [],
@@ -227,10 +242,13 @@ export default function Game({}: Props) {
             
             setGameState({
                 gameId: data.game_id,
-                status: 'active',
+                status: 'intro',  // Changed from 'active' to 'intro'
                 scenarioName: data.scenario_name,
                 setting: data.setting,
                 victim: data.victim,
+                location: data.location,
+                timeOfIncident: data.time_of_incident,
+                timeline: data.timeline,
                 personas: data.personas,
                 introMessage: data.intro_message,
                 revealedClues: [],
@@ -249,6 +267,49 @@ export default function Game({}: Props) {
         } finally {
             setIsGenerating(false);
         }
+    };
+
+    const quickStartGame = async () => {
+        setIsGenerating(true);
+        try {
+            const response = await axios.post('/game/quick-start');
+            
+            const data = response.data;
+            
+            setGameState({
+                gameId: data.game_id,
+                status: 'intro',
+                scenarioName: data.scenario_name,
+                setting: data.setting,
+                victim: data.victim,
+                location: data.location,
+                timeOfIncident: data.time_of_incident,
+                timeline: data.timeline,
+                personas: data.personas,
+                introMessage: data.intro_message,
+                revealedClues: [],
+                messages: {},
+            });
+            // Reset read counts when starting new game
+            setReadCounts({});
+            // Reset pinned and saved messages for new game
+            setPinnedMessages(new Set());
+            setSavedMessages(new Set());
+            // Reset selected persona
+            setSelectedPersona(null);
+        } catch (error: any) {
+            console.error('Failed to quick start:', error);
+            alert(error.response?.data?.error || 'Quick Start fehlgeschlagen. Bitte versuche es erneut.');
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const beginInvestigation = () => {
+        setGameState(prev => ({
+            ...prev,
+            status: 'active'
+        }));
     };
 
     const sendMessage = async (message: string) => {
@@ -399,6 +460,30 @@ export default function Game({}: Props) {
                     setDifficulty={setDifficulty}
                     isGenerating={isGenerating}
                     onStartGame={generateAndStartGame}
+                    onQuickStart={quickStartGame}
+                />
+            </>
+        );
+    }
+
+    // Introduction state - show case briefing and personas
+    if (gameState.status === 'intro') {
+        const caseNumber = gameState.gameId?.toUpperCase().slice(0, 8) || 'UNKNOWN';
+        
+        return (
+            <>
+                <Head title={`${gameState.scenarioName} - Briefing`} />
+                <IntroductionScreen
+                    scenarioName={gameState.scenarioName}
+                    setting={gameState.setting}
+                    victim={gameState.victim}
+                    location={gameState.location}
+                    timeOfIncident={gameState.timeOfIncident}
+                    timeline={gameState.timeline}
+                    personas={gameState.personas}
+                    introMessage={gameState.introMessage}
+                    caseNumber={caseNumber}
+                    onBeginInvestigation={beginInvestigation}
                 />
             </>
         );
@@ -460,7 +545,14 @@ export default function Game({}: Props) {
                                         status: 'not-started',
                                         scenarioName: '',
                                         setting: '',
-                                        victim: '',
+                                        victim: {
+                                            name: '',
+                                            role: '',
+                                            description: ''
+                                        },
+                                        location: '',
+                                        timeOfIncident: '',
+                                        timeline: '',
                                         personas: [],
                                         introMessage: '',
                                         revealedClues: [],
@@ -501,6 +593,8 @@ export default function Game({}: Props) {
                 <GameHeader 
                     revealedClues={gameState.revealedClues}
                     onAccuse={() => setShowAccuseModal(true)}
+                    scenarioName={gameState.scenarioName}
+                    caseNumber={gameState.gameId?.toUpperCase().slice(0, 8) || 'UNKNOWN'}
                 />
                 
                 <div className="flex-1 flex gap-0 p-2 max-w-[1920px] mx-auto w-full min-h-0">
@@ -587,6 +681,11 @@ export default function Game({}: Props) {
                         <CaseInfoPanel 
                             revealedClues={gameState.revealedClues}
                             gameId={gameState.gameId}
+                            scenarioName={gameState.scenarioName}
+                            victim={gameState.victim}
+                            location={gameState.location}
+                            timeOfIncident={gameState.timeOfIncident}
+                            personaCount={gameState.personas.length}
                             pinnedMessages={pinnedMessages}
                             messages={gameState.messages}
                             personas={gameState.personas}
@@ -601,6 +700,7 @@ export default function Game({}: Props) {
                     personas={gameState.personas}
                     onAccuse={accusePersona}
                     isLoading={isLoading}
+                    victimName={`${gameState.victim.name} (${gameState.victim.role})`}
                 />
             </div>
         </>

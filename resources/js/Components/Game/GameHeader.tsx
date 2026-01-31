@@ -5,9 +5,11 @@ import { useState } from 'react';
 interface GameHeaderProps {
     revealedClues: string[];
     onAccuse: () => void;
+    scenarioName: string;
+    caseNumber: string;
 }
 
-export function GameHeader({ revealedClues, onAccuse }: GameHeaderProps) {
+export function GameHeader({ revealedClues, onAccuse, scenarioName, caseNumber }: GameHeaderProps) {
     const [showClues, setShowClues] = useState(false);
     
     return (
@@ -17,7 +19,7 @@ export function GameHeader({ revealedClues, onAccuse }: GameHeaderProps) {
                 <div className="flex items-center gap-4">
                     <span className="text-white">CLASSIFIED</span>
                     <span className="text-gray-400">CASE FILE:</span>
-                    <span className="cia-text-yellow">INNOTECH-2024</span>
+                    <span className="cia-text-yellow">{caseNumber}</span>
                 </div>
                 <div className="flex items-center gap-4">
                     <span className="text-gray-400">STATUS:</span>
@@ -37,9 +39,9 @@ export function GameHeader({ revealedClues, onAccuse }: GameHeaderProps) {
                     </Link>
                     <div>
                         <h1 className="font-bold text-white uppercase tracking-wider cia-text text-sm">
-                            ACTIVE INVESTIGATION
+                            {scenarioName}
                         </h1>
-                        <p className="text-xs text-gray-400 cia-text">CASE: <span className="cia-monospace">INNOTECH-2024-001</span></p>
+                        <p className="text-xs text-gray-400 cia-text">CASE: <span className="cia-monospace">{caseNumber}</span></p>
                     </div>
                 </div>
                 

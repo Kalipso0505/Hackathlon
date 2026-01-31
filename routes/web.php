@@ -13,6 +13,7 @@ Route::get('/', function () {
 Route::prefix('game')->name('game.')->group(function () {
     Route::get('/', [GameController::class, 'index'])->name('index');
     Route::post('/generate-and-start', [GameController::class, 'generateAndStart'])->name('generate-and-start');
+    Route::post('/quick-start', [GameController::class, 'quickStart'])->name('quick-start');
     Route::post('/start', [GameController::class, 'start'])->name('start');
     Route::post('/chat', [GameController::class, 'chat'])->name('chat');
     Route::get('/{gameId}/history', [GameController::class, 'history'])->name('history');

@@ -64,6 +64,9 @@ class GameController extends Controller
                 'scenario_name' => $gameInfo['scenario_name'],
                 'setting' => $gameInfo['setting'],
                 'victim' => $gameInfo['victim'],
+                'location' => $gameInfo['location'] ?? 'Unknown Location',
+                'time_of_incident' => $gameInfo['time_of_incident'] ?? 'Time unknown',
+                'timeline' => $gameInfo['timeline'] ?? '',
                 'personas' => $gameInfo['personas'],
                 'intro_message' => $gameInfo['intro_message'],
             ]);
@@ -73,6 +76,43 @@ class GameController extends Controller
 
             return response()->json([
                 'error' => 'Szenario-Generierung fehlgeschlagen',
+                'details' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
+    }
+
+    public function quickStart(Request $request): JsonResponse
+    {
+        // Create game entry first
+        $game = Game::create([
+            'user_id' => $request->user()?->id,
+            'scenario_slug' => 'default_villa_sonnenhof',
+            'status' => 'active',
+            'revealed_clues' => [],
+            'expires_at' => now()->addMinutes(60),
+        ]);
+
+        try {
+            // Load default scenario instantly (no AI generation)
+            $gameInfo = $this->aiService->quickStartScenario($game->id);
+
+            return response()->json([
+                'game_id' => $game->id,
+                'scenario_name' => $gameInfo['scenario_name'],
+                'setting' => $gameInfo['setting'],
+                'victim' => $gameInfo['victim'],
+                'location' => $gameInfo['location'] ?? 'Unknown Location',
+                'time_of_incident' => $gameInfo['time_of_incident'] ?? 'Time unknown',
+                'timeline' => $gameInfo['timeline'] ?? '',
+                'personas' => $gameInfo['personas'],
+                'intro_message' => $gameInfo['intro_message'],
+            ]);
+        } catch (\Exception $e) {
+            // Cleanup on failure
+            $game->delete();
+
+            return response()->json([
+                'error' => 'Fehler beim Laden des Standard-Szenarios',
                 'details' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }

@@ -10,6 +10,7 @@ interface StartScreenProps {
     setDifficulty: (value: 'einfach' | 'mittel' | 'schwer') => void;
     isGenerating: boolean;
     onStartGame: () => void;
+    onQuickStart: () => void;
 }
 
 export function StartScreen({
@@ -19,6 +20,7 @@ export function StartScreen({
     setDifficulty,
     isGenerating,
     onStartGame,
+    onQuickStart,
 }: StartScreenProps) {
     const difficulties: Array<{ value: 'einfach' | 'mittel' | 'schwer'; label: string; description: string }> = [
         { value: 'einfach', label: 'Einfach', description: 'Klare Hinweise, Mörder gibt schnell nach' },
@@ -28,6 +30,16 @@ export function StartScreen({
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-950 to-slate-900 flex items-center justify-center p-4">
+            {/* Quick Start Debug Button */}
+            <button
+                onClick={onQuickStart}
+                disabled={isGenerating}
+                className="fixed top-4 right-4 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-bold rounded shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed z-50"
+                title="Sofortstart mit vorgefertigtem Szenario (keine AI-Generierung)"
+            >
+                ⚡ Quick Start
+            </button>
+
             <Card className="w-full max-w-2xl bg-slate-800/90 border-red-900/50 shadow-2xl">
                 <CardHeader>
                     <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">

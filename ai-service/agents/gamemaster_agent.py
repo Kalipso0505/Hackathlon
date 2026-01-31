@@ -79,11 +79,22 @@ class GameMasterAgent:
         if game_id not in self.game_states:
             self.initialize_game(game_id)
         
+        # Extract location and time from setting or timeline
+        location = self._extract_location_from_setting()
+        time_of_incident = self._extract_time_from_timeline()
+        
         return {
             "game_id": game_id,
             "scenario_name": self.scenario["name"],
             "setting": self.scenario["setting"],
-            "victim": f"{self.scenario['victim']['name']} ({self.scenario['victim']['role']})",
+            "victim": {
+                "name": self.scenario['victim']['name'],
+                "role": self.scenario['victim']['role'],
+                "description": self.scenario['victim'].get('description', '')
+            },
+            "location": location,
+            "time_of_incident": time_of_incident,
+            "timeline": self.scenario.get("timeline", ""),
             "personas": [
                 {
                     "slug": p["slug"],
@@ -106,6 +117,52 @@ class GameMasterAgent:
             "klaus": "🔧"
         }
         return emojis.get(slug, "👤")
+    
+    def _extract_location_from_setting(self) -> str:
+        """Extract location from setting text"""
+        setting = self.scenario.get("setting", "")
+        
+        # Try to find location in first few sentences
+        lines = setting.split('\n')
+        if lines:
+            # Usually first line contains location
+            first_line = lines[0].strip()
+            # Remove common prefixes
+            first_line = first_line.replace('Die ', '').replace('Das ', '').replace('Der ', '')
+            # Take first sentence
+            if '.' in first_line:
+                location = first_line.split('.')[0]
+            else:
+                location = first_line[:80]  # Max 80 chars
+            return location
+        
+        return "Unknown Location"
+    
+    def _extract_time_from_timeline(self) -> str:
+        """Extract time of incident from timeline"""
+        timeline = self.scenario.get("timeline", "")
+        
+        # Look for lines containing "Tatzeit" or time ranges
+        import re
+        
+        # Pattern for time ranges like "20:00-23:00" or "20:00 - 23:00"
+        time_pattern = r'\d{1,2}:\d{2}\s*[-–]\s*\d{1,2}:\d{2}'
+        
+        lines = timeline.split('\n')
+        for line in lines:
+            if 'Tatzeit' in line or 'TATZEIT' in line:
+                # Found incident time line
+                match = re.search(time_pattern, line)
+                if match:
+                    return line.strip('- ').strip()
+                return line.strip('- ').strip()
+        
+        # Fallback: search for any time range in timeline
+        match = re.search(time_pattern, timeline)
+        if match:
+            return f"Estimated: {match.group()}"
+        
+        return "Time unknown"
     
     def router_node(self, state: GameState) -> str:
         """
