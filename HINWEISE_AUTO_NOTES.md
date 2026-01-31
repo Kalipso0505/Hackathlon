@@ -206,7 +206,10 @@ Noch keine Tests implementiert. Empfohlene Test-Szenarien:
 2. **Verstärkter Prompt**: Explizite Warnung im User-Prompt (`⚠️ WICHTIG: Du MUSST GENAU 4 oder mehr Verdächtige erstellen!`)
 3. **Fehler-Feedback**: Bei Retry wird der vorherige Fehler mitgeteilt
 
-**Prompt-Änderungen** (`ai-service/SCENARIO_GENERATOR_PROMPT.md`):
+**Prompt-Änderungen** (`database/seeders/PromptTemplateSeeder.php` - Single Source of Truth):
 - Kommentare im Schema: `# PERSONA 1 von 4`, `# PERSONA 2 von 4`, etc.
 - Qualitätskontrolle: Expliziter Check "HAST DU GENAU 4 ODER MEHR PERSONAS?"
 - Warnung: "Das Szenario wird ABGELEHNT wenn weniger als 4 Personas vorhanden sind!"
+
+**Hinweis**: Die `.md` Prompt-Datei wurde gelöscht. Der Seeder ist die einzige Quelle.
+Nach Änderungen: `php artisan db:seed --class=PromptTemplateSeeder`
