@@ -25,8 +25,9 @@ Du MUSST deine Antwort als valides Python Dictionary mit exakt dieser Struktur a
 SCENARIO_NAME = {
     "name": "Der Fall [Name]",
     "setting": """
-[2-3 Absätze Beschreibung: Wo? Wann? Was ist passiert? Wie wurde das Opfer gefunden?
-Inkl. wichtige Details wie Zugangssystem, Überwachung, geschlossener Raum, etc.]
+[2-3 Absätze Beschreibung: Wo genau? (Name des Ortes) Wann? Was ist passiert? Wie wurde das Opfer gefunden?
+Inkl. wichtige Details wie Zugangssystem, Überwachung, geschlossener Raum, etc.
+WICHTIG: Der erste Satz sollte klar den Ort benennen, z.B. "Das Weingut Müller liegt in der Pfalz..." oder "Die Villa am Starnberger See..."]
     """.strip(),
     
     "victim": {
@@ -60,9 +61,10 @@ FAKTEN DIE ALLE WISSEN:
 BEKANNTE ZEITLEISTE:
 - [Zeitpunkt]: [Was ist passiert - vor der Tat]
 - [Zeitpunkt]: [Was ist passiert - vor der Tat]
-- [Geschätzte Tatzeit]: [Zeitfenster]
+- [Tatzeitraum mit genauer Zeit, z.B. "Sonntag 20:00 - 23:00" oder "Freitag Abend, 21:30 - 22:15"]: Geschätzte Tatzeit
 - [Zeitpunkt]: [Leichenfund/Alarm]
 - [Zeitpunkt]: [Polizei/Ermittlungen]
+WICHTIG: Die Tatzeit muss präzise angegeben werden im Format "[Tag] [Zeit] - [Zeit]" oder "[Wochentag] [Tageszeit], [Zeit] - [Zeit]"
     """.strip(),
     
     "personas": [

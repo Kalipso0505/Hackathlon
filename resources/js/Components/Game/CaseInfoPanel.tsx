@@ -15,9 +15,20 @@ interface Persona {
     role: string;
 }
 
+interface Victim {
+    name: string;
+    role: string;
+    description: string;
+}
+
 interface CaseInfoPanelProps {
     revealedClues: string[];
     gameId: string | null;
+    scenarioName: string;
+    victim: Victim;
+    location: string;
+    timeOfIncident: string;
+    personaCount: number;
     pinnedMessages?: Set<string>;
     messages?: Record<string, Message[]>;
     personas?: Persona[];
@@ -25,7 +36,18 @@ interface CaseInfoPanelProps {
 
 type TabType = 'notes' | 'evidence' | 'case';
 
-export function CaseInfoPanel({ revealedClues, gameId, pinnedMessages = new Set(), messages = {}, personas = [] }: CaseInfoPanelProps) {
+export function CaseInfoPanel({ 
+    revealedClues, 
+    gameId, 
+    scenarioName,
+    victim,
+    location,
+    timeOfIncident,
+    personaCount,
+    pinnedMessages = new Set(), 
+    messages = {}, 
+    personas = [] 
+}: CaseInfoPanelProps) {
     const [activeTab, setActiveTab] = useState<TabType>('case');
     const [notes, setNotes] = useState<string>('');
     
@@ -210,14 +232,14 @@ export function CaseInfoPanel({ revealedClues, gameId, pinnedMessages = new Set(
                     <div className="p-4 space-y-4">
                         <div className="cia-document p-4">
                             <div className="border-b-2 border-black pb-2 mb-3">
-                                <h3 className="text-sm font-bold uppercase cia-text">CASE FILE</h3>
-                                <p className="text-xs text-gray-600 cia-text">CASE <span className="cia-monospace">#INNOTECH-2024-001</span></p>
+                                <h3 className="text-sm font-bold uppercase cia-text">{scenarioName}</h3>
+                                <p className="text-xs text-gray-600 cia-text">CASE <span className="cia-monospace">#{gameId?.toUpperCase().slice(0, 8) || 'N/A'}</span></p>
                             </div>
                             
                             <div className="space-y-3 text-xs cia-text">
                                 <div>
                                     <span className="font-bold uppercase">VICTIM:</span>
-                                    <span className="ml-2">MARCUS WEBER, CFO</span>
+                                    <span className="ml-2">{victim.name}, {victim.role}</span>
                                 </div>
                                 <div>
                                     <span className="font-bold uppercase">STATUS:</span>
@@ -225,15 +247,15 @@ export function CaseInfoPanel({ revealedClues, gameId, pinnedMessages = new Set(
                                 </div>
                                 <div>
                                     <span className="font-bold uppercase">LOCATION:</span>
-                                    <span className="ml-2">INNOTECH HEADQUARTERS</span>
+                                    <span className="ml-2">{location}</span>
                                 </div>
                                 <div>
                                     <span className="font-bold uppercase">TIME OF INCIDENT:</span>
-                                    <span className="ml-2">SUNDAY EVENING, 20:00 - 23:00</span>
+                                    <span className="ml-2">{timeOfIncident}</span>
                                 </div>
                                 <div className="pt-2 border-t border-gray-300">
                                     <span className="font-bold uppercase">CASE ID:</span>
-                                    <span className="ml-2 cia-monospace font-mono">{gameId || 'N/A'}</span>
+                                    <span className="ml-2 cia-monospace font-mono">{gameId?.toUpperCase().slice(0, 8) || 'N/A'}</span>
                                 </div>
                             </div>
                         </div>
@@ -245,7 +267,7 @@ export function CaseInfoPanel({ revealedClues, gameId, pinnedMessages = new Set(
                             <div className="space-y-2 text-xs cia-text">
                                 <div className="flex justify-between">
                                     <span className="text-gray-400">SUBJECTS INTERROGATED:</span>
-                                    <span className="text-white">4</span>
+                                    <span className="text-white">{personaCount}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-400">EVIDENCE COLLECTED:</span>

@@ -19,6 +19,7 @@ from agents.gamemaster_agent import GameMasterAgent
 from agents.graph import create_murder_mystery_graph, get_graph_visualization
 from agents.state import Message
 from scenarios.office_murder import OFFICE_MURDER_SCENARIO
+from scenarios.default_scenario import DEFAULT_SCENARIO
 from services.scenario_generator import ScenarioGenerator
 
 # Setup logging
@@ -50,7 +51,7 @@ async def lifespan(app: FastAPI):
     
     # Initialize Scenario Generator
     scenario_generator = ScenarioGenerator(
-        model_name=os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        model_name=os.getenv("OPENAI_MODEL", "gpt-4o")  # Changed to gpt-4o for faster generation
     )
     
     logger.info("Multi-Agent System ready!")
@@ -131,6 +132,11 @@ class ScenarioGenerateResponse(BaseModel):
     scenario_name: str
 
 
+class QuickStartRequest(BaseModel):
+    """Request for quick start with default scenario"""
+    game_id: str
+
+
 # === API Endpoints ===
 
 @app.get("/health")
@@ -143,6 +149,47 @@ async def health_check():
         "multi_agent": True,
         "active_games": len(gamemasters)
     }
+
+
+@app.post("/scenario/quick-start")
+async def quick_start_scenario(request: QuickStartRequest):
+    """
+    Load the default pre-made scenario instantly (no AI generation).
+    Perfect for testing and demos.
+    """
+    logger.info(f"Quick-starting default scenario for game_id: {request.game_id}")
+    
+    try:
+        # Initialize a new GameMasterAgent with the default scenario
+        new_gamemaster = GameMasterAgent(
+            scenario=DEFAULT_SCENARIO,
+            model_name=os.getenv("OPENAI_MODEL", "gpt-4o")
+        )
+        gamemasters[request.game_id] = new_gamemaster
+        
+        # Create a new graph for this gamemaster
+        murder_graphs[request.game_id] = create_murder_mystery_graph(new_gamemaster)
+        
+        logger.info(f"Default scenario loaded instantly for game_id: {request.game_id}")
+        
+        # Get game info for the response
+        game_info = new_gamemaster.get_game_info(request.game_id)
+        
+        return {
+            "success": True,
+            "game_id": request.game_id,
+            "scenario_name": game_info['scenario_name'],
+            "setting": game_info['setting'],
+            "victim": game_info['victim'],
+            "location": game_info.get('location', 'Unknown Location'),
+            "time_of_incident": game_info.get('time_of_incident', 'Time unknown'),
+            "timeline": game_info.get('timeline', ''),
+            "personas": game_info['personas'],
+            "intro_message": game_info['intro_message'],
+        }
+    except Exception as e:
+        logger.error(f"Error loading default scenario: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to load scenario: {e}")
 
 
 @app.post("/scenario/generate", response_model=ScenarioGenerateResponse)

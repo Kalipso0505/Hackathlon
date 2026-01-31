@@ -15,6 +15,7 @@ interface AccuseModalProps {
     personas: Persona[];
     onAccuse: (personaSlug: string) => void;
     isLoading: boolean;
+    victimName: string;
 }
 
 export function AccuseModal({ 
@@ -22,7 +23,8 @@ export function AccuseModal({
     onClose, 
     personas, 
     onAccuse,
-    isLoading 
+    isLoading,
+    victimName
 }: AccuseModalProps) {
     const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
     const [confirmStep, setConfirmStep] = useState(false);
@@ -81,7 +83,7 @@ export function AccuseModal({
                                 </div>
                                 <p className="text-sm mb-2">
                                     <span className="font-bold uppercase">OBJECTIVE:</span>
-                                    <span className="ml-2">IDENTIFY THE PERPETRATOR OF THE MURDER OF MARCUS WEBER</span>
+                                    <span className="ml-2">IDENTIFY THE PERPETRATOR OF THE MURDER OF {victimName}</span>
                                 </p>
                                 <p className="text-xs text-red-600 font-bold uppercase cia-text mt-4">
                                     ⚠ WARNING: THIS ACTION WILL TERMINATE THE INVESTIGATION ⚠

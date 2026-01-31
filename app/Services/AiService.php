@@ -51,6 +51,23 @@ class AiService
     }
 
     /**
+     * Quick start with default pre-made scenario (no AI generation)
+     */
+    public function quickStartScenario(string $gameId): array
+    {
+        $response = Http::timeout(10) // Quick, no AI generation
+            ->post("{$this->baseUrl}/scenario/quick-start", [
+                'game_id' => $gameId,
+            ]);
+
+        if (! $response->ok()) {
+            throw new RuntimeException('Failed to load default scenario: '.$response->body());
+        }
+
+        return $response->json();
+    }
+
+    /**
      * Start a new game session
      */
     public function startGame(string $gameId): array
