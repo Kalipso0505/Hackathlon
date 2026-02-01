@@ -14,6 +14,7 @@ Route::get('/', function () {
 // Murder Mystery Game Routes
 Route::prefix('game')->name('game.')->group(function () {
     Route::get('/', [GameController::class, 'index'])->name('index');
+    Route::get('/{gameId}', [GameController::class, 'show'])->name('show');
     Route::post('/generate-and-start', [GameController::class, 'generateAndStart'])->name('generate-and-start');
     Route::post('/quick-start', [GameController::class, 'quickStart'])->name('quick-start');
     Route::post('/start', [GameController::class, 'start'])->name('start');

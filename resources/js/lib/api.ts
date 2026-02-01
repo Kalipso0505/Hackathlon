@@ -12,11 +12,25 @@ import type {
     Difficulty 
 } from '@/types/game';
 
+// Get CSRF token from meta tag
+const getCsrfToken = (): string => {
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    return token || '';
+};
+
 const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
     },
+    withCredentials: true,
+});
+
+// Update CSRF token on each request (in case it changes)
+api.interceptors.request.use((config) => {
+    config.headers['X-CSRF-TOKEN'] = getCsrfToken();
+    return config;
 });
 
 // ============================================================================

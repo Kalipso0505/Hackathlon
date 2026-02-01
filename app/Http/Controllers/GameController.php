@@ -32,12 +32,56 @@ class GameController extends Controller
     }
 
     /**
-     * Show the game page
+     * Show the game page (start screen)
      */
     #[ExcludeRouteFromDocs]
     public function index(): Response
     {
         return Inertia::render('Game');
+    }
+
+    /**
+     * Show a specific game by ID
+     */
+    #[ExcludeRouteFromDocs]
+    public function show(string $gameId): Response
+    {
+        $game = Game::with('messages')->findOrFail($gameId);
+
+        // Get game state from AI service
+        try {
+            $gameInfo = $this->aiService->getGameState($gameId);
+        } catch (\Exception $e) {
+            $this->log('warning', 'Could not load game state from AI service', [
+                'game_id' => $gameId,
+                'error' => $e->getMessage(),
+            ]);
+            $gameInfo = null;
+        }
+
+        return Inertia::render('Game', [
+            'initialGame' => $gameInfo ? [
+                'game_id' => $game->id,
+                'status' => $game->status,
+                'scenario_name' => $gameInfo['scenario_name'] ?? 'Unknown',
+                'setting' => $gameInfo['setting'] ?? '',
+                'victim' => $gameInfo['victim'] ?? null,
+                'location' => $gameInfo['location'] ?? '',
+                'time_of_incident' => $gameInfo['time_of_incident'] ?? '',
+                'timeline' => $gameInfo['timeline'] ?? '',
+                'personas' => $gameInfo['personas'] ?? [],
+                'intro_message' => $gameInfo['intro_message'] ?? '',
+                'revealed_clues' => $game->revealed_clues ?? [],
+                'messages' => $game->messages->groupBy('persona_slug')->map(function ($messages) {
+                    return $messages->map(fn ($msg) => [
+                        'persona_slug' => $msg->persona_slug,
+                        'content' => $msg->content,
+                        'is_user' => $msg->isUserMessage(),
+                        'messageId' => $msg->id,
+                    ])->values();
+                })->toArray(),
+            ] : null,
+        ]);
     }
 
     /**
@@ -133,7 +177,7 @@ class GameController extends Controller
             $game->delete();
 
             return response()->json([
-                'error' => 'Szenario-Generierung fehlgeschlagen',
+                'error' => 'Scenario generation failed',
                 'details' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
@@ -185,7 +229,7 @@ class GameController extends Controller
             $game->delete();
 
             return response()->json([
-                'error' => 'Fehler beim Laden des Standard-Szenarios',
+                'error' => 'Failed to load default scenario',
                 'details' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
@@ -348,7 +392,7 @@ class GameController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'AI Service nicht erreichbar. Bitte versuche es später erneut.',
+                'error' => 'AI Service unavailable. Please try again later.',
                 'details' => config('app.debug') ? $e->getMessage() : null,
             ], 503);
         }
@@ -396,23 +440,32 @@ class GameController extends Controller
             return response()->json(['error' => 'Game is not active'], 400);
         }
 
-        // Tom is the murderer (for default scenario)
-        // For generated scenarios, we need to get this from AI service
-        $correct = $validated['accused_persona'] === 'tom';
+        // Get the solution from AI service
+        $solution = $this->aiService->getSolution($game->id);
+        $murdererSlug = $solution['murderer']['slug'] ?? 'tom'; // Fallback for old scenarios
+        
+        $correct = $validated['accused_persona'] === $murdererSlug;
         $game->solve($validated['accused_persona'], $correct);
 
         $this->log('info', 'Game accusation', [
             'game_id' => $game->id,
             'accused' => $validated['accused_persona'],
             'correct' => $correct,
+            'actual_murderer' => $murdererSlug,
             'clues_revealed' => count($game->revealed_clues ?? []),
         ]);
 
         $result = [
             'correct' => $correct,
             'message' => $correct
-                ? 'Richtig! Du hast den Fall gelöst!'
-                : 'Falsch! Das war nicht der Mörder.',
+                ? 'Correct! You have solved the case!'
+                : 'Wrong! That was not the murderer.',
+            'solution' => [
+                'murderer' => $solution['murderer'] ?? null,
+                'motive' => $solution['motive'] ?? null,
+                'weapon' => $solution['weapon'] ?? null,
+                'critical_clues' => $solution['critical_clues'] ?? [],
+            ],
         ];
 
         // Cleanup: Delete game and messages if solved

@@ -1,6 +1,10 @@
 // Main Layout
 export { GameLayout } from "./game-layout";
+export { GameLayoutV1 } from "./game-layout-v1";
+export { GameLayoutV2 } from "./game-layout-v2";
+export { GameLayoutV3 } from "./game-layout-v3";
 export { GameHeader } from "./game-header";
+export { GameHeaderDark } from "./game-header-dark";
 
 // Screens
 export { StartScreenV3 } from "./start-screen-v3";
@@ -8,6 +12,7 @@ export { IntroScreenV3 } from "./intro-screen-v3";
 
 // Modals
 export { AccuseModal } from "./accuse-modal";
+export { AccuseModalV2 } from "./accuse-modal-v2";
 
 // Panels
 export { CaseInfoPanel } from "./case-info-panel";

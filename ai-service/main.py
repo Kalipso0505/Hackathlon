@@ -505,6 +505,36 @@ async def get_personas_debug(game_id: str):
     }
 
 
+@app.get("/game/{game_id}/solution")
+async def get_game_solution(game_id: str):
+    """Get the solution for a game (murderer, motive, weapon, clues)"""
+    gamemaster = gamemasters.get(game_id)
+    
+    if not gamemaster:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Game {game_id} not found"
+        )
+    
+    solution = gamemaster.scenario.get("solution", {})
+    personas = {p["slug"]: p for p in gamemaster.scenario.get("personas", [])}
+    
+    # Get murderer details
+    murderer_slug = solution.get("murderer", "")
+    murderer_persona = personas.get(murderer_slug, {})
+    
+    return {
+        "murderer": {
+            "slug": murderer_slug,
+            "name": murderer_persona.get("name", "Unknown"),
+            "role": murderer_persona.get("role", ""),
+        },
+        "motive": solution.get("motive", "Unknown motive"),
+        "weapon": solution.get("weapon", "Unknown weapon"),
+        "critical_clues": solution.get("critical_clues", []),
+    }
+
+
 @app.get("/debug/graph")
 async def get_graph_debug():
     """Get the graph structure for visualization"""

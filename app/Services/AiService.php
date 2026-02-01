@@ -212,4 +212,46 @@ class AiService
 
         return $personas;
     }
+
+    /**
+     * Get the current game state from AI service
+     */
+    public function getGameState(string $gameId): ?array
+    {
+        $this->log('debug', 'Getting game state', ['game_id' => $gameId]);
+
+        $response = Http::timeout(10)->get("{$this->baseUrl}/game/{$gameId}/state");
+
+        if (! $response->ok()) {
+            $this->log('warning', 'Get game state failed', [
+                'game_id' => $gameId,
+                'status_code' => $response->status(),
+            ]);
+
+            return null;
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Get the solution for a game (murderer, motive, weapon, clues)
+     */
+    public function getSolution(string $gameId): ?array
+    {
+        $this->log('debug', 'Getting game solution', ['game_id' => $gameId]);
+
+        $response = Http::timeout(10)->get("{$this->baseUrl}/game/{$gameId}/solution");
+
+        if (! $response->ok()) {
+            $this->log('warning', 'Get solution failed', [
+                'game_id' => $gameId,
+                'status_code' => $response->status(),
+            ]);
+
+            return null;
+        }
+
+        return $response->json();
+    }
 }

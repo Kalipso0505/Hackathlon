@@ -5,7 +5,8 @@ import type {
     Persona, 
     Message, 
     Difficulty,
-    GameSolution 
+    GameSolution,
+    InitialGameData
 } from '@/types/game';
 import * as api from '@/lib/api';
 import { useLocalStorage, useLocalStorageSet } from './use-local-storage';
@@ -27,10 +28,32 @@ const initialGameState: GameState = {
 };
 
 /**
+ * Convert server initial data to game state
+ */
+function createInitialState(data: InitialGameData | null | undefined): GameState {
+    if (!data) return initialGameState;
+    
+    return {
+        gameId: data.game_id,
+        status: data.status === 'active' ? 'active' : 'intro',
+        scenarioName: data.scenario_name,
+        setting: data.setting,
+        victim: data.victim || { name: '', role: '', description: '' },
+        location: data.location,
+        timeOfIncident: data.time_of_incident,
+        timeline: data.timeline,
+        personas: data.personas,
+        introMessage: data.intro_message,
+        revealedClues: data.revealed_clues || [],
+        messages: data.messages || {},
+    };
+}
+
+/**
  * Central hook for managing game state
  */
-export function useGameState() {
-    const [gameState, setGameState] = useState<GameState>(initialGameState);
+export function useGameState(initialData?: InitialGameData | null) {
+    const [gameState, setGameState] = useState<GameState>(() => createInitialState(initialData));
     const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -82,7 +105,7 @@ export function useGameState() {
             setReadCounts({});
             setSelectedPersona(null);
         } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Szenario-Generierung fehlgeschlagen';
+            const errorMessage = error instanceof Error ? error.message : 'Scenario generation failed';
             console.error('Failed to generate scenario:', error);
             throw new Error(errorMessage);
         } finally {
@@ -113,7 +136,7 @@ export function useGameState() {
             setReadCounts({});
             setSelectedPersona(null);
         } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Quick Start fehlgeschlagen';
+            const errorMessage = error instanceof Error ? error.message : 'Quick start failed';
             console.error('Failed to quick start:', error);
             throw new Error(errorMessage);
         } finally {
@@ -195,7 +218,7 @@ export function useGameState() {
                 };
             });
         } catch (error: unknown) {
-            const errorContent = error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten';
+            const errorContent = error instanceof Error ? error.message : 'An error occurred';
             const errorMessage: Message = {
                 persona_slug: personaSlug,
                 content: errorContent,

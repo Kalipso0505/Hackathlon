@@ -88,9 +88,21 @@ export interface GameState {
     messages: ChatHistory;
 }
 
+export interface SolutionDetails {
+    murderer: {
+        slug: string;
+        name: string;
+        role: string;
+    } | null;
+    motive: string | null;
+    weapon: string | null;
+    critical_clues: string[];
+}
+
 export interface GameSolution {
     correct: boolean;
     message: string;
+    solution?: SolutionDetails;
 }
 
 // ============================================================================
@@ -170,4 +182,23 @@ export interface AgentsInfoResponse {
     agents: AgentInfo[];
     multi_agent_enabled: boolean;
     graph_nodes?: string[];
+}
+
+// ============================================================================
+// Initial Game Data (from Server)
+// ============================================================================
+
+export interface InitialGameData {
+    game_id: string;
+    status: string;
+    scenario_name: string;
+    setting: string;
+    victim: Victim | null;
+    location: string;
+    time_of_incident: string;
+    timeline: string;
+    personas: Persona[];
+    intro_message: string;
+    revealed_clues: string[];
+    messages: ChatHistory;
 }
