@@ -135,6 +135,7 @@ export function useGameState(initialData?: InitialGameData | null) {
                 introMessage: data.intro_message,
                 revealedClues: [],
                 messages: {},
+                crimeSceneImages: data.crime_scene_images || [],
             });
             setReadCounts({});
             setSelectedPersona(null);
