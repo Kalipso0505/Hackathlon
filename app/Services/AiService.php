@@ -88,13 +88,13 @@ class AiService
     }
 
     /**
-     * Quick start with default pre-made scenario (no AI generation)
+     * Quick start with default pre-made scenario (no AI generation, but images are generated)
      */
     public function quickStartScenario(string $gameId): array
     {
         $this->log('info', 'Quick start scenario', ['game_id' => $gameId]);
 
-        $response = Http::timeout(10) // Quick, no AI generation
+        $response = Http::timeout(60) // Longer timeout for image generation
             ->post("{$this->baseUrl}/scenario/quick-start", [
                 'game_id' => $gameId,
             ]);

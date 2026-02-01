@@ -12,12 +12,17 @@ Erstelle eine `.env` Datei im `ai-service/` Ordner:
 cp .env.example .env
 ```
 
-Dann füge deinen OpenAI API Key ein:
+Dann füge deine API Keys ein:
 
 ```env
 OPENAI_API_KEY=sk-dein-api-key-hier
 OPENAI_MODEL=gpt-4o-mini
+
+# Optional: Für Crime Scene Bildgenerierung
+GOOGLE_GEMINI_API_KEY=dein-gemini-api-key-hier
 ```
+
+> **Hinweis:** Der `GOOGLE_GEMINI_API_KEY` ist optional. Ohne ihn werden keine Crime Scene Fotos generiert, das Spiel funktioniert aber trotzdem.
 
 ### 2. Docker starten
 
@@ -57,7 +62,13 @@ Listet alle verfügbaren Personas.
 ai-service/
 ├── main.py              # FastAPI App
 ├── agents/
-│   └── game_master.py   # LangGraph Orchestrator
+│   ├── gamemaster_agent.py  # LangGraph Orchestrator
+│   ├── persona_agent.py     # Persona AI Agents
+│   └── graph.py             # LangGraph Definition
+├── services/
+│   ├── scenario_generator.py # AI Szenario-Generierung
+│   ├── image_generator.py    # Gemini Crime Scene Fotos
+│   └── voice_service.py      # ElevenLabs TTS
 ├── scenarios/
 │   └── office_murder.py # Mordfall-Definition
 ├── Dockerfile

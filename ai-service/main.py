@@ -24,6 +24,7 @@ from scenarios.office_murder import OFFICE_MURDER_SCENARIO
 from scenarios.default_scenario import DEFAULT_SCENARIO
 from services.scenario_generator import ScenarioGenerator
 from services.prompt_service import get_prompt_service
+from services.image_generator import get_image_generator
 
 # Setup logging
 logging.basicConfig(
@@ -162,6 +163,7 @@ class GameStartResponse(BaseModel):
     timeline: str = ""
     personas: list[dict]
     intro_message: str
+    crime_scene_images: list[str] = []  # Base64 encoded crime scene photos
 
 
 class ScenarioGenerateRequest(BaseModel):
@@ -186,6 +188,7 @@ class ScenarioGenerateResponse(BaseModel):
     game_id: str
     scenario_name: str
     metrics: Optional[GenerationMetricsResponse] = None
+    crime_scene_images: list[str] = []  # Base64 encoded crime scene photos
 
 
 class QuickStartRequest(BaseModel):
@@ -228,6 +231,10 @@ async def quick_start_scenario(request: QuickStartRequest):
         
         logger.info(f"Default scenario loaded instantly for game_id: {request.game_id}")
         
+        # Generate crime scene images for default scenario
+        image_generator = get_image_generator()
+        crime_scene_images = await image_generator.generate_crime_scene_images(DEFAULT_SCENARIO)
+        
         # Get game info for the response
         game_info = new_gamemaster.get_game_info(request.game_id)
         
@@ -242,6 +249,7 @@ async def quick_start_scenario(request: QuickStartRequest):
             "timeline": game_info.get('timeline', ''),
             "personas": game_info['personas'],
             "intro_message": game_info['intro_message'],
+            "crime_scene_images": crime_scene_images,
         }
     except Exception as e:
         logger.error(f"Error loading default scenario: {e}", exc_info=True)
@@ -295,6 +303,12 @@ async def generate_scenario(request: ScenarioGenerateRequest):
         gamemasters[request.game_id] = gamemaster
         murder_graphs[request.game_id] = graph
         
+        # Generate crime scene images
+        img_start = time.time()
+        image_generator = get_image_generator()
+        crime_scene_images = await image_generator.generate_crime_scene_images(scenario)
+        img_time = time.time() - img_start
+        
         total_time = time.time() - request_start
         
         logger.info("=" * 70)
@@ -303,10 +317,12 @@ async def generate_scenario(request: ScenarioGenerateRequest):
         logger.info(f"   Scenario:       {scenario['name']}")
         logger.info(f"   Personas:       {len(scenario['personas'])}")
         logger.info(f"   Murderer:       {scenario['solution']['murderer']}")
+        logger.info(f"   Images:         {len(crime_scene_images)}")
         logger.info("-" * 70)
         logger.info(f"   ⏱️  Generation:   {gen_time:.2f}s")
         logger.info(f"   ⏱️  GameMaster:   {gm_time:.2f}s")
         logger.info(f"   ⏱️  Graph:        {graph_time:.2f}s")
+        logger.info(f"   ⏱️  Images:       {img_time:.2f}s")
         logger.info(f"   ⏱️  TOTAL:        {total_time:.2f}s")
         logger.info("=" * 70)
         
@@ -326,7 +342,8 @@ async def generate_scenario(request: ScenarioGenerateRequest):
             success=True,
             game_id=request.game_id,
             scenario_name=scenario["name"],
-            metrics=metrics_response
+            metrics=metrics_response,
+            crime_scene_images=crime_scene_images
         )
         
     except Exception as e:

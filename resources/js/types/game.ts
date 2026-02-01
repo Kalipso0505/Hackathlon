@@ -63,6 +63,7 @@ export interface CaseInfo {
     timeOfIncident: string;
     timeline: string;
     introMessage: string;
+    crimeSceneImages?: string[];  // Base64 encoded crime scene photos
 }
 
 // ============================================================================
@@ -86,6 +87,7 @@ export interface GameState {
     introMessage: string;
     revealedClues: string[];
     messages: ChatHistory;
+    crimeSceneImages: string[];  // Base64 encoded crime scene photos
 }
 
 export interface SolutionDetails {
@@ -119,6 +121,7 @@ export interface GameStartResponse {
     timeline: string;
     personas: Persona[];
     intro_message: string;
+    crime_scene_images?: string[];  // Base64 encoded crime scene photos
 }
 
 export interface ChatResponse {
@@ -201,4 +204,5 @@ export interface InitialGameData {
     intro_message: string;
     revealed_clues: string[];
     messages: ChatHistory;
+    crime_scene_images?: string[];  // Base64 encoded crime scene photos
 }

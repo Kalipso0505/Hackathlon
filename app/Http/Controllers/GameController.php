@@ -163,6 +163,7 @@ class GameController extends Controller
                 'timeline' => $gameInfo['timeline'] ?? '',
                 'personas' => $gameInfo['personas'],
                 'intro_message' => $gameInfo['intro_message'],
+                'crime_scene_images' => $scenarioResult['crime_scene_images'] ?? [],
             ]);
         } catch (\Exception $e) {
             $duration = round(microtime(true) - $startTime, 2);
@@ -218,6 +219,7 @@ class GameController extends Controller
                 'timeline' => $gameInfo['timeline'] ?? '',
                 'personas' => $gameInfo['personas'],
                 'intro_message' => $gameInfo['intro_message'],
+                'crime_scene_images' => $gameInfo['crime_scene_images'] ?? [],
             ]);
         } catch (\Exception $e) {
             $this->log('error', 'Quick start failed', [

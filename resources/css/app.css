@@ -186,6 +186,79 @@
     .animate-drip {
         animation: drip 3s ease-in-out infinite;
     }
+
+    /* Realistic old TV flicker - balanced frequency and intensity */
+    @keyframes tv-flicker {
+        0%, 100% {
+            filter: brightness(1) contrast(1);
+        }
+        /* First subtle flicker */
+        6% {
+            filter: brightness(1) contrast(1);
+        }
+        6.3% {
+            filter: brightness(0.88) contrast(1.12);
+        }
+        6.6% {
+            filter: brightness(1.1) contrast(0.9);
+        }
+        7% {
+            filter: brightness(1) contrast(1);
+        }
+        /* Medium intensity flash */
+        28% {
+            filter: brightness(1) contrast(1);
+        }
+        28.2% {
+            filter: brightness(0.8) contrast(1.2);
+        }
+        28.5% {
+            filter: brightness(1.15) contrast(0.85);
+        }
+        28.8% {
+            filter: brightness(1) contrast(1);
+        }
+        /* Quick double tap */
+        52% {
+            filter: brightness(1) contrast(1);
+        }
+        52.2% {
+            filter: brightness(1.12) contrast(0.88);
+        }
+        52.4% {
+            filter: brightness(0.85) contrast(1.15);
+        }
+        52.7% {
+            filter: brightness(1) contrast(1);
+        }
+        /* Subtle pulse */
+        73% {
+            filter: brightness(1) contrast(1);
+        }
+        73.3% {
+            filter: brightness(0.92) contrast(1.08);
+        }
+        73.6% {
+            filter: brightness(1) contrast(1);
+        }
+        /* Final stronger flicker */
+        91% {
+            filter: brightness(1) contrast(1);
+        }
+        91.2% {
+            filter: brightness(0.82) contrast(1.18);
+        }
+        91.5% {
+            filter: brightness(1.12) contrast(0.88);
+        }
+        91.8% {
+            filter: brightness(1) contrast(1);
+        }
+    }
+
+    .animate-tv-flicker {
+        animation: tv-flicker 10s ease-in-out infinite;
+    }
 }
 
 /* ============================================================================

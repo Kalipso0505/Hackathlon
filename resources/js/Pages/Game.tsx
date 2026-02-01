@@ -61,6 +61,7 @@ export default function GameNew({ initialGame }: GamePageProps) {
         timeOfIncident: game.timeOfIncident,
         timeline: game.timeline,
         introMessage: game.introMessage,
+        crimeSceneImages: game.crimeSceneImages,
     };
 
     // Handle accusation

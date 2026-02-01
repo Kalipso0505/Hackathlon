@@ -25,6 +25,7 @@ const initialGameState: GameState = {
     introMessage: '',
     revealedClues: [],
     messages: {},
+    crimeSceneImages: [],
 };
 
 /**
@@ -46,6 +47,7 @@ function createInitialState(data: InitialGameData | null | undefined): GameState
         introMessage: data.intro_message,
         revealedClues: data.revealed_clues || [],
         messages: data.messages || {},
+        crimeSceneImages: data.crime_scene_images || [],
     };
 }
 
@@ -101,6 +103,7 @@ export function useGameState(initialData?: InitialGameData | null) {
                 introMessage: data.intro_message,
                 revealedClues: [],
                 messages: {},
+                crimeSceneImages: data.crime_scene_images || [],
             });
             setReadCounts({});
             setSelectedPersona(null);
@@ -132,6 +135,7 @@ export function useGameState(initialData?: InitialGameData | null) {
                 introMessage: data.intro_message,
                 revealedClues: [],
                 messages: {},
+                crimeSceneImages: data.crime_scene_images || [],
             });
             setReadCounts({});
             setSelectedPersona(null);
