@@ -243,16 +243,17 @@ async def generate_scenario(request: ScenarioGenerateRequest):
     """
     Generate a new scenario and initialize GameMaster for this game.
     
+    Uses parallel persona generation for faster scenario creation.
     This creates a unique scenario for the game_id.
     """
     if not scenario_generator:
         raise HTTPException(status_code=503, detail="Scenario generator not initialized")
     
-    logger.info(f"Generating scenario for game {request.game_id}")
+    logger.info(f"Generating scenario for game {request.game_id} (parallel mode)")
     
     try:
-        # Generate the scenario
-        scenario = scenario_generator.generate(
+        # Generate the scenario using async parallel generation
+        scenario = await scenario_generator.generate_async(
             user_input=request.user_input,
             difficulty=request.difficulty
         )
