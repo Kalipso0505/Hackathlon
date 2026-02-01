@@ -30,6 +30,7 @@ interface ChatWindowProps {
     savedMessages: Set<string>;
     onPinMessage: (messageId: string, content: string, personaName: string) => void;
     onSaveToNotes: (messageId: string, content: string, personaName: string) => void;
+    onSaveToQuestions?: (content: string) => void;
 }
 
 export function ChatWindow({ 
@@ -42,13 +43,15 @@ export function ChatWindow({
     pinnedMessages,
     savedMessages,
     onPinMessage,
-    onSaveToNotes
+    onSaveToNotes,
+    onSaveToQuestions
 }: ChatWindowProps) {
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [savedToQuestions, setSavedToQuestions] = useState<Set<string>>(new Set());
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -219,6 +222,37 @@ export function ChatWindow({
                                 }
                                 ${isPinned ? 'ring-2 ring-yellow-500/50' : ''}
                             `}>
+                                {/* Save to Questions button - for user messages only */}
+                                {message.is_user && onSaveToQuestions && (
+                                    <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover/message:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onSaveToQuestions(message.content);
+                                                setSavedToQuestions(prev => new Set(prev).add(messageId));
+                                                // Reset indicator after 2 seconds
+                                                setTimeout(() => {
+                                                    setSavedToQuestions(prev => {
+                                                        const next = new Set(prev);
+                                                        next.delete(messageId);
+                                                        return next;
+                                                    });
+                                                }, 2000);
+                                            }}
+                                            className={`
+                                                w-6 h-6 rounded flex items-center justify-center transition-colors
+                                                ${savedToQuestions.has(messageId)
+                                                    ? 'bg-green-500/30 text-green-300' 
+                                                    : 'bg-black/30 border border-white/10 text-gray-400 hover:text-white hover:border-white/20'
+                                                }
+                                            `}
+                                            title={savedToQuestions.has(messageId) ? 'Gespeichert!' : 'Zu Fragen hinzufügen'}
+                                        >
+                                            <span className="text-xs">{savedToQuestions.has(messageId) ? '✓' : '❓'}</span>
+                                        </button>
+                                    </div>
+                                )}
+                                
                                 {/* Action buttons - visible on hover, top right - nur für Persona-Nachrichten */}
                                 {!message.is_user && (
                                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/message:opacity-100 transition-opacity">

@@ -174,6 +174,32 @@ export default function Game({}: Props) {
         });
     };
     
+    const handleSaveToQuestions = (content: string) => {
+        if (!gameState.gameId) return;
+        
+        const questionsKey = `case-questions-${gameState.gameId}`;
+        const existingQuestionsStr = localStorage.getItem(questionsKey);
+        const existingQuestions = existingQuestionsStr ? JSON.parse(existingQuestionsStr) : [];
+        
+        // Check if this question already exists (avoid duplicates)
+        const alreadyExists = existingQuestions.some((q: { text: string }) => 
+            q.text.toLowerCase().trim() === content.toLowerCase().trim()
+        );
+        
+        if (!alreadyExists) {
+            const newQuestion = {
+                id: `q-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                text: content,
+                createdAt: new Date().toISOString(),
+                askedCount: 1, // Already asked once since it's from chat
+            };
+            const updatedQuestions = [newQuestion, ...existingQuestions];
+            localStorage.setItem(questionsKey, JSON.stringify(updatedQuestions));
+            // Trigger update in CaseInfoPanel
+            window.dispatchEvent(new CustomEvent('questions-updated'));
+        }
+    };
+    
     // Column widths with localStorage persistence
     const [leftWidth, setLeftWidth] = useState(() => {
         const saved = localStorage.getItem('column-width-left');
@@ -668,6 +694,7 @@ export default function Game({}: Props) {
                                 savedMessages={savedMessages}
                                 onPinMessage={handlePinMessage}
                                 onSaveToNotes={handleSaveToNotes}
+                                onSaveToQuestions={handleSaveToQuestions}
                             />
                         ) : (
                             <div className="h-full cia-bg-panel border border-white/10 flex items-center justify-center">

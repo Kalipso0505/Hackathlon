@@ -42,7 +42,14 @@ interface CaseInfoPanelProps {
     autoNotes?: Record<string, AutoNote[]>;
 }
 
-type TabType = 'notes' | 'intel' | 'evidence' | 'case';
+type TabType = 'notes' | 'intel' | 'evidence' | 'case' | 'questions';
+
+interface SavedQuestion {
+    id: string;
+    text: string;
+    createdAt: string;
+    askedCount: number;
+}
 
 const categoryConfig: Record<string, { label: string; color: string; icon: string }> = {
     alibi: { label: 'ALIBI', color: 'text-blue-400 border-blue-500/30 bg-blue-500/10', icon: '🕐' },
@@ -68,6 +75,9 @@ export function CaseInfoPanel({
     const [activeTab, setActiveTab] = useState<TabType>('intel');
     const [notes, setNotes] = useState<string>('');
     const [collapsedPersonas, setCollapsedPersonas] = useState<Set<string>>(new Set());
+    const [questions, setQuestions] = useState<SavedQuestion[]>([]);
+    const [newQuestion, setNewQuestion] = useState<string>('');
+    const [copiedQuestionId, setCopiedQuestionId] = useState<string | null>(null);
     
     const togglePersona = (slug: string) => {
         setCollapsedPersonas(prev => {
@@ -112,6 +122,79 @@ export function CaseInfoPanel({
         }
     }, [notes, gameId]);
     
+    // Load questions from localStorage
+    useEffect(() => {
+        if (gameId) {
+            const savedQuestions = localStorage.getItem(`case-questions-${gameId}`);
+            if (savedQuestions) {
+                try {
+                    setQuestions(JSON.parse(savedQuestions));
+                } catch {
+                    setQuestions([]);
+                }
+            }
+        }
+    }, [gameId]);
+    
+    // Listen for questions updates from chat window
+    useEffect(() => {
+        const handleQuestionsUpdate = () => {
+            if (gameId) {
+                const savedQuestions = localStorage.getItem(`case-questions-${gameId}`);
+                if (savedQuestions) {
+                    try {
+                        setQuestions(JSON.parse(savedQuestions));
+                    } catch {
+                        setQuestions([]);
+                    }
+                }
+            }
+        };
+        window.addEventListener('questions-updated', handleQuestionsUpdate);
+        return () => window.removeEventListener('questions-updated', handleQuestionsUpdate);
+    }, [gameId]);
+    
+    // Save questions to localStorage
+    useEffect(() => {
+        if (gameId && questions.length > 0) {
+            localStorage.setItem(`case-questions-${gameId}`, JSON.stringify(questions));
+        }
+    }, [questions, gameId]);
+    
+    // Add a new question
+    const handleAddQuestion = () => {
+        if (!newQuestion.trim()) return;
+        const question: SavedQuestion = {
+            id: `q-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            text: newQuestion.trim(),
+            createdAt: new Date().toISOString(),
+            askedCount: 0,
+        };
+        setQuestions(prev => [question, ...prev]);
+        setNewQuestion('');
+    };
+    
+    // Copy question to clipboard
+    const handleCopyQuestion = async (question: SavedQuestion) => {
+        try {
+            await navigator.clipboard.writeText(question.text);
+            setCopiedQuestionId(question.id);
+            // Increment asked count
+            setQuestions(prev => prev.map(q => 
+                q.id === question.id ? { ...q, askedCount: q.askedCount + 1 } : q
+            ));
+            // Reset copied indicator after 2 seconds
+            setTimeout(() => setCopiedQuestionId(null), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
+    
+    // Delete a question
+    const handleDeleteQuestion = (questionId: string) => {
+        setQuestions(prev => prev.filter(q => q.id !== questionId));
+    };
+    
     // Get pinned messages
     const getPinnedMessages = () => {
         const pinned: Array<{ message: Message; personaName: string }> = [];
@@ -141,6 +224,7 @@ export function CaseInfoPanel({
     
     const tabs: { id: TabType; label: string; badge?: number }[] = [
         { id: 'intel', label: 'INTEL', badge: totalAutoNotes },
+        { id: 'questions', label: 'FRAGEN', badge: questions.length || undefined },
         { id: 'notes', label: 'NOTIZEN' },
         { id: 'evidence', label: 'BEWEISE' },
         { id: 'case', label: 'FALL' },
@@ -323,6 +407,119 @@ export function CaseInfoPanel({
                                 <p className="text-[10px] text-gray-500 cia-text mt-1">Befrage Verdächtige</p>
                             </div>
                         )}
+                    </div>
+                )}
+                
+                {activeTab === 'questions' && (
+                    <div className="p-3 h-full flex flex-col">
+                        <div className="mb-3">
+                            <h3 className="text-xs text-white uppercase cia-text font-bold mb-1">
+                                FRAGEN-SAMMLUNG
+                            </h3>
+                            <p className="text-[10px] text-gray-400 cia-text">
+                                Speichere Fragen und verwende sie bei verschiedenen Verdächtigen
+                            </p>
+                        </div>
+                        
+                        {/* Add new question */}
+                        <div className="mb-3">
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={newQuestion}
+                                    onChange={(e) => setNewQuestion(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleAddQuestion();
+                                        }
+                                    }}
+                                    placeholder="Neue Frage eingeben..."
+                                    className="
+                                        flex-1 cia-bg-dark border border-white/10 
+                                        px-3 py-2 text-white cia-text text-xs rounded
+                                        focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10
+                                        placeholder-gray-500
+                                    "
+                                />
+                                <button
+                                    onClick={handleAddQuestion}
+                                    disabled={!newQuestion.trim()}
+                                    className="
+                                        px-3 py-2 bg-white/10 hover:bg-white/20 
+                                        text-white cia-text text-xs font-bold rounded
+                                        disabled:opacity-30 disabled:cursor-not-allowed
+                                        transition-colors
+                                    "
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {/* Questions list */}
+                        <div className="flex-1 overflow-y-auto cia-scrollbar space-y-2">
+                            {questions.length > 0 ? (
+                                questions.map((question) => (
+                                    <div 
+                                        key={question.id}
+                                        className={`
+                                            group cia-bg-dark border rounded p-2.5 cursor-pointer
+                                            transition-all duration-200
+                                            ${copiedQuestionId === question.id 
+                                                ? 'border-green-500/50 bg-green-500/10' 
+                                                : 'border-white/10 hover:border-white/20 hover:bg-white/5'
+                                            }
+                                        `}
+                                        onClick={() => handleCopyQuestion(question)}
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <p className="text-xs text-white cia-text leading-relaxed flex-1">
+                                                {question.text}
+                                            </p>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteQuestion(question.id);
+                                                }}
+                                                className="
+                                                    opacity-0 group-hover:opacity-100
+                                                    text-gray-500 hover:text-red-400
+                                                    text-xs transition-opacity
+                                                "
+                                                title="Löschen"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-white/5">
+                                            <span className="text-[10px] text-gray-500 cia-text">
+                                                {copiedQuestionId === question.id ? '✓ Kopiert!' : 'Klicken zum Kopieren'}
+                                            </span>
+                                            {question.askedCount > 0 && (
+                                                <span className="text-[10px] text-gray-500 cia-text">
+                                                    {question.askedCount}× verwendet
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="cia-bg-dark border border-white/10 p-4 text-center">
+                                    <p className="text-[10px] text-gray-400 cia-text">KEINE FRAGEN GESPEICHERT</p>
+                                    <p className="text-[10px] text-gray-500 cia-text mt-1">
+                                        Füge oben Fragen hinzu, die du mehreren Verdächtigen stellen möchtest
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Tips */}
+                        <div className="mt-3 pt-3 border-t border-white/10">
+                            <p className="text-[10px] text-gray-500 cia-text">
+                                💡 Tipp: Klicke auf eine Frage, um sie in die Zwischenablage zu kopieren
+                            </p>
+                        </div>
                     </div>
                 )}
                 
